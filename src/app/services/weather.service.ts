@@ -33,9 +33,9 @@ export class WeatherService {
           const radarStationsPromise = this.getRadarStations(this.weatherDisplay.observationStations);
           radarStationsPromise.then(
             function(observationStationsSuccess) {
-              const radarStations = observationStationsSuccess['observationStations'];
-              // TODO instead of pulling the first station, find the nearest lat and long value
-              this.weatherDisplay.observationsURL = radarStations[0] + '/observations/latest';
+              // Select the closest radar station to use in call
+              const closestStation = this.getRadarStationClosest(observationStationsSuccess['features'], lat, long);
+              this.weatherDisplay.observationsURL = closestStation + '/observations/latest';
 
               // Current Observations
               const observationsPromise = this.getObservations(this.weatherDisplay.observationsURL);
@@ -126,6 +126,41 @@ export class WeatherService {
         catchError(this.handleError)
       )
       .toPromise();
+  }
+
+  getRadarStationClosest(observationStations: {}, lat: string, long: string): string {
+    const radarStations = <any> observationStations;
+    let closestStation = '';
+    let firstTime = true;
+    let minDistance = 0;
+
+    const x1: number = parseFloat(long);
+    const y1: number = parseFloat(lat);
+
+    radarStations.forEach((element) => {
+      // when calculating distance use the distance formula
+      // sqrt of (x2-x1)^2 + (y2-y1)^2
+      // long = x
+      // lat = y
+      const x2: number = parseFloat(element['geometry']['coordinates'][0]);
+      const y2: number = parseFloat(element['geometry']['coordinates'][1]);
+      const xSquared: number = (x2 - x1) * (x2 - x1);
+      const ySquared: number = (y2 - y1) * (y2 - y1);
+      const distance = Math.sqrt(xSquared + ySquared);
+
+      if (firstTime) {
+        firstTime = false;
+        minDistance = distance;
+        closestStation = element['id'];
+      } else {
+        if (distance < minDistance) {
+          minDistance = distance;
+          closestStation = element['id'];
+        }
+      }
+    });
+
+    return closestStation;
   }
 
   private handleError(error: HttpErrorResponse) {
