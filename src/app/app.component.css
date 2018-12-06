@@ -1,0 +1,18 @@
+.header-image{
+    height: 10em;
+    width: 10em;
+}
+
+.panel-header{
+    display: flex;
+    justify-content: left;
+}
+
+.panel-header > p {
+    padding-right: 1em;
+    width: 10em;
+}
+
+.container{
+    margin-top: 2em;
+}

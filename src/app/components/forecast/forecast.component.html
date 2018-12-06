@@ -1,0 +1,21 @@
+<div class="container" *ngIf="displayValues; else elseBlock">
+  <div class="row" *ngFor="let detailedForecast of weatherDisplay.forecast">
+    <div class="col-sm">
+      <div class="container details">
+        <div class="row">
+          <span class="heading">{{detailedForecast.name}}</span>
+        </div>
+        <div class="row">
+          <span class="temperature">{{detailedForecast.temperature}}°</span>
+          <span class="wind-speed">{{detailedForecast.windSpeed}}</span>  
+        </div>
+        <div class="row">
+          <span class="detailed-forecast">{{detailedForecast.detailedForecast}}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<ng-template #elseBlock>
+  <mat-spinner></mat-spinner>
+</ng-template>

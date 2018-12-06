@@ -1,0 +1,45 @@
+.col-sm{
+    display: flex;
+    justify-content: center;
+}
+
+.col-sm > span{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1em;
+    margin-bottom: 1em;
+    margin-right: 1em;
+}
+
+.details{
+    border-top-style: solid;
+    border-top-color: blue;
+    border-top-width: .05em;
+}
+
+.heading{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2em;
+    font-weight: bold;
+}
+
+.detailed-forecast{
+    margin-top: 1em;
+}
+
+.row{
+    margin-top: 1em;
+}
+
+.wind-speed{
+    font-weight: bold;
+    width: 10em;
+}
+
+.temperature{
+    font-weight: bold;
+    width: 10em;
+}

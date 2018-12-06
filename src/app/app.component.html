@@ -1,0 +1,37 @@
+<div class="jumbotron">
+  <div class="container">
+    <div class="row">
+      <div class="col-sm">
+        <h1 class="display-4">Weather App</h1>
+        <p class="lead">This is a simple weather app that uses the NOAA APIs to show details of your local weather</p>
+      </div>
+      <div class="col-sm">
+        <img class="header-image" src='../assets/Header_Image.png'>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="container">
+  <div class="row">
+    <div class="col-sm">
+      <h1>Current Weather</h1>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm">
+      <app-current-weather [weatherDisplay] = "weatherDisplay"></app-current-weather>
+    </div>
+  </div>
+</div>
+<div class="container">
+  <div class="row">
+    <div class="col-sm">
+      <h1>Today's Forecast</h1>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm">
+      <app-forecast [weatherDisplay] = "weatherDisplay"></app-forecast>
+    </div>
+  </div>
+</div>
