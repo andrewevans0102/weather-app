@@ -4,7 +4,6 @@ export class WeatherDisplay {
     currentTemperature: string;
     currentLocation: string;
     icon: string;
-    location: string;
     forecastURL: string;
     observationsURL: string;
     radarStation: string;

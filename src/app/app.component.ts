@@ -11,15 +11,9 @@ export class AppComponent implements OnInit {
   title = 'weather-app';
   lat: string;
   long: string;
-  propertiesResponse: any;
-  forecast: string;
-  forecastHourly: string;
-  radarStation: string;
-  icon: string;
-  location: string;
   weatherDisplay: WeatherDisplay;
 
-  constructor(private weatherService: WeatherService) {}
+  constructor(public weatherService: WeatherService) {}
 
   ngOnInit(): void {
     if (navigator.geolocation) {
