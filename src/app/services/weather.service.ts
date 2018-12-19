@@ -1,8 +1,5 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-import { catchError, retry } from 'rxjs/operators';
 import { WeatherDisplay } from '../models/weatherDisplay';
 
 @Injectable({
@@ -10,122 +7,75 @@ import { WeatherDisplay } from '../models/weatherDisplay';
 })
 export class WeatherService {
 
-  NOAABase = 'https://api.weather.gov';
   weatherDisplay: WeatherDisplay = new WeatherDisplay();
 
   constructor(private http: HttpClient) { }
 
-  getWeather(lat: string, long: string): Promise<any> {
-    return new Promise((resolve, reject) => {
+  async getWeather(lat: string, long: string): Promise<WeatherDisplay> {
+    try {
+      const metadata: any = await this.getMetadata(lat, long);
+      if (metadata instanceof Error) {
+        throw metadata;
+      }
       this.weatherDisplay.latitude = lat;
       this.weatherDisplay.longitude = long;
+      this.weatherDisplay.radarStation = metadata['properties']['radarStation'];
+      const city = metadata['properties']['relativeLocation']['properties']['city'];
+      const state = metadata['properties']['relativeLocation']['properties']['state'];
+      this.weatherDisplay.currentLocation = city + ', ' + state;
+      this.weatherDisplay.forecastURL = metadata['properties']['forecast'];
+      this.weatherDisplay.radarStationsURL = metadata['properties']['observationStations'];
 
-      const metadataPromise = this.getMetadata(lat, long);
-      metadataPromise.then(
-        function(metadataSuccess) {
-          this.weatherDisplay.radarStation = metadataSuccess['properties']['radarStation'];
-          const city = metadataSuccess['properties']['relativeLocation']['properties']['city'];
-          const state = metadataSuccess['properties']['relativeLocation']['properties']['state'];
-          this.weatherDisplay.currentLocation = city + ', ' + state;
-          this.weatherDisplay.forecastURL = metadataSuccess['properties']['forecast'];
-          this.weatherDisplay.observationStations = metadataSuccess['properties']['observationStations'];
+      // Select the closest radar station to use in call
+      const radarStations = await this.getRadarStations(this.weatherDisplay.radarStationsURL);
+      if (radarStations instanceof Error) {
+        throw radarStations;
+      }
+      const closestStation = this.getRadarStationClosest(radarStations['features'], lat, long);
+      this.weatherDisplay.observationsURL = closestStation + '/observations/latest';
 
-          const radarStationsPromise = this.getRadarStations(this.weatherDisplay.observationStations);
-          radarStationsPromise.then(
-            function(observationStationsSuccess) {
-              // Select the closest radar station to use in call
-              const closestStation = this.getRadarStationClosest(observationStationsSuccess['features'], lat, long);
-              this.weatherDisplay.observationsURL = closestStation + '/observations/latest';
+      const latestObservations = await this.getLatestObservations(this.weatherDisplay.observationsURL);
+      if (latestObservations instanceof Error) {
+        throw latestObservations;
+      }
+      const celsius = latestObservations['properties']['temperature']['value'];
+      const farenheit = (celsius + (9 / 5) + 32).toFixed(0);
+      this.weatherDisplay.currentTemperature = String(farenheit);
+      this.weatherDisplay.icon = latestObservations['properties']['icon'];
 
-              // Current Observations
-              const observationsPromise = this.getObservations(this.weatherDisplay.observationsURL);
-              observationsPromise.then(
-                function(observationsSuccess) {
-                  const celsius = observationsSuccess['properties']['temperature']['value'];
-                  const farenheit = (celsius + (9 / 5) + 32).toFixed(0);
-                  this.weatherDisplay.temperature = String(farenheit);
-                  this.weatherDisplay.icon = observationsSuccess['properties']['icon'];
-                }.bind(this),
-                function(error) {
-                  alert (error);
-                  reject(error);
-                }
-              );
+      const detailedForecast = await this.getDetailedForecast(this.weatherDisplay.forecastURL);
+      if (detailedForecast instanceof Error) {
+        throw detailedForecast;
+      }
+      this.weatherDisplay.forecast = detailedForecast['properties']['periods'];
+    } catch (error) {
+      this.weatherDisplay.errorMessage = error.message;
+    }
 
-              // Detailed Forecast
-              const detailedForecastPromise = this.getDetailedForecast(this.weatherDisplay.forecastURL);
-              detailedForecastPromise.then(
-                function(detailedForecastSuccess) {
-                  this.weatherDisplay.forecast = detailedForecastSuccess['properties']['periods'];
-                }.bind(this),
-                function(error) {
-                  alert(error);
-                  reject(error);
-                }
-              );
-
-              // Call Promise.all to get all the information at one time
-              Promise.all(
-                [observationsPromise, detailedForecastPromise])
-                .then(
-                  function(success) {
-                    resolve(this.weatherDisplay);
-                  }.bind(this),
-                  function(error) {
-                    alert(error);
-                    reject(error);
-                  }
-                );
-            }.bind(this),
-            function(error) {
-              alert(error);
-              reject(error);
-            }
-          );
-        }.bind(this),
-        function(error) {
-          alert(error);
-          reject(error);
-        }
-      );
+    return new Promise<WeatherDisplay>((resolve) => {
+      resolve(this.weatherDisplay);
     });
   }
 
   getMetadata(lat: string, long: string): Promise<any> {
-    const NOAAEndpoint = this.NOAABase + '/points/' + lat + ',' + long;
-    return this.http.get(NOAAEndpoint)
-      .pipe(
-        retry(3),
-        catchError(this.handleError)
-      )
-      .toPromise();
+    const metadataURL: string = 'https://api.weather.gov/points/' + lat + ',' + long;
+    return this.http.get(metadataURL).toPromise()
+      .catch(() => new Error('error when calling metadataURL'));
   }
 
-  getRadarStations(radarStationsURL: string): Promise<any> {
-    return this.http.get(radarStationsURL)
-      .pipe(
-        retry(3),
-        catchError(this.handleError)
-      )
-      .toPromise();
+  getRadarStations(observationsStationsURL): Promise<any> {
+    return this.http.get(observationsStationsURL).toPromise()
+      .catch(() => new Error('error when calling observationStationsURL'));
   }
 
-  getObservations(observationsURL: string): Promise<any> {
-    return this.http.get(observationsURL)
-      .pipe(
-        retry(3),
-        catchError(this.handleError)
-      )
-      .toPromise();
+  getLatestObservations(observationsURL): Promise<any> {
+    return this.http.get(observationsURL).toPromise()
+      .catch(() => new Error('error when calling observationsURL'));
   }
 
-  getDetailedForecast(NOAAEndpoint: string): Promise<any> {
-    return this.http.get(NOAAEndpoint)
-      .pipe(
-        retry(3),
-        catchError(this.handleError)
-      )
-      .toPromise();
+  getDetailedForecast(forecastURL): Promise<any> {
+    return this.http.get(forecastURL).toPromise()
+      .catch(() => new Error('error when calling forecastURL'));
   }
 
   getRadarStationClosest(observationStations: {}, lat: string, long: string): string {
@@ -161,21 +111,5 @@ export class WeatherService {
     });
 
     return closestStation;
-  }
-
-  private handleError(error: HttpErrorResponse) {
-    if (error.error instanceof ErrorEvent) {
-      // A client-side or network error occurred. Handle it accordingly.
-      console.error('An error occurred:', error.error.message);
-    } else {
-      // The backend returned an unsuccessful response code.
-      // The response body may contain clues as to what went wrong,
-      console.error(
-        `Backend returned code ${error.status}, ` +
-        `body was: ${error.error}`);
-    }
-    // return an observable with a user-facing error message
-    return throwError(
-      'Something bad happened; please try again later.');
   }
 }

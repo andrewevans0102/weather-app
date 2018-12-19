@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "public": "dist/weather-app",
+    "public": "dist",
     "ignore": [
       "firebase.json",
       "**/.*",

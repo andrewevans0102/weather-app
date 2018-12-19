@@ -1,5 +1,4 @@
 import { Component, OnInit, Input, OnChanges, SimpleChange } from '@angular/core';
-import { WeatherService } from '../../services/weather.service';
 import { WeatherDisplay } from 'src/app/models/weatherDisplay';
 
 @Component({
@@ -12,7 +11,7 @@ export class CurrentWeatherComponent implements OnInit, OnChanges {
   @Input() weatherDisplay: WeatherDisplay;
   displayValues: boolean;
 
-  constructor(private weatherService: WeatherService) { }
+  constructor() { }
 
   ngOnInit(): void {
     this.weatherDisplay = new WeatherDisplay();

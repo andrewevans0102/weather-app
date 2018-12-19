@@ -16,3 +16,15 @@
 .container{
     margin-top: 2em;
 }
+
+.service-status{
+    border-top-style: solid;
+    border-top-color: blue;
+    border-top-width: .05em;
+    display: flex;
+    align-items: left;
+    justify-content: left;
+    font-size: 2em;
+    font-weight: bold;
+    margin-top: 2em;
+}

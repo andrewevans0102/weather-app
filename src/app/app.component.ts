@@ -8,23 +8,19 @@ import { WeatherDisplay } from './models/weatherDisplay';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
-  title = 'weather-app';
   lat: string;
   long: string;
-  weatherDisplay: WeatherDisplay;
+  weatherDisplay: WeatherDisplay = new WeatherDisplay();
 
-  constructor(public weatherService: WeatherService) {}
+  constructor(public weatherService: WeatherService) { }
 
   ngOnInit(): void {
-    if (navigator.geolocation) {
-       navigator.geolocation.getCurrentPosition((position) => {
+    try {
+      navigator.geolocation.getCurrentPosition((position) => {
         this.savePosition(position);
       });
-    } else {
-      alert('Browser does not support location finding, showing weather for New York City, NY');
-      // When no location is set then default it to New York City
-      this.lat = '40.7128';
-      this.long = '-74.0060';
+    } catch (error) {
+      alert('Browser does not support location services');
     }
   }
 
@@ -32,14 +28,19 @@ export class AppComponent implements OnInit {
     this.lat = position.coords.latitude.toFixed(4).toString();
     this.long = position.coords.longitude.toFixed(4).toString();
 
-    this.weatherService.getWeather(this.lat, this.long).then(
-      function(success) {
-        this.weatherDisplay = success;
-      }.bind(this),
-      function(error) {
-        alert(error);
-      }
-    );
+      this.weatherService.getWeather(this.lat, this.long)
+      .then(
+        function(success) {
+          this.weatherDisplay = success;
+          if (this.weatherDisplay.errorMessage !== undefined) {
+            alert(this.weatherDisplay.errorMessage);
+          }
+        }.bind(this),
+        function(error) {
+          alert(error);
+          this.weatherDisplay = new WeatherDisplay();
+        }.bind(this)
+      );
   }
 
 }
