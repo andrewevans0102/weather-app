@@ -9,7 +9,6 @@
     "lint": "ng lint",
     "e2e": "ng e2e",
     "coverage-report": "ng test --code-coverage --watch=true",
-    "show-coverage": "http-server -c-1 -o -p 9875 ./coverage",
     "delete-coverage": "rm -rf coverage",
     "code-coverage": "npm run delete-coverage && npm run coverage-report",
     "build-prod": "ng build --prod",
@@ -32,7 +31,6 @@
     "@ng-bootstrap/ng-bootstrap": "^4.0.0",
     "bootstrap": "^4.1.3",
     "core-js": "^2.5.4",
-    "live-server": "^1.2.1",
     "material-design-icons": "^3.0.1",
     "rxjs": "~6.2.0",
     "zone.js": "~0.8.26"
@@ -46,7 +44,6 @@
     "@types/jasminewd2": "~2.0.3",
     "@types/node": "~8.9.4",
     "codelyzer": "~4.3.0",
-    "http-server": "^0.11.1",
     "jasmine-core": "~2.99.1",
     "jasmine-spec-reporter": "~4.2.1",
     "karma": "~3.0.0",
