@@ -12,11 +12,11 @@ jobs:
             - run:
                 name: Show current directory
                 command: pwd
+            - restore_cache:
+                keys:
+                    - v1-dependencies-{{ checksum "package.json" }}
             - run:
-                name: Show current files
-                command: ls
-            - run:
-                name: Install local dependencies
+                name: Install dependencies
                 command: npm install
             - save_cache:
                 key: v1-dependencies-{{ checksum "package.json" }}
