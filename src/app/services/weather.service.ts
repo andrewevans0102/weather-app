@@ -25,8 +25,6 @@ export class WeatherService {
       this.weatherDisplay.forecastURL = metadata['properties']['forecast'];
       this.weatherDisplay.observationsURL = metadata['properties']['forecastZone'] + '/observations';
 
-      console.log(this.weatherDisplay.observationsURL);
-
       const latestObservations = await this.getLatestObservations(this.weatherDisplay.observationsURL);
       if (latestObservations instanceof Error) {
         throw latestObservations;
@@ -46,8 +44,6 @@ export class WeatherService {
       const displayDate = this.formatDate(timestampDate);
       const displayTime = this.formatTime(timestampTime);
       this.weatherDisplay.readingTime = displayDate + ', ' + displayTime;
-
-      console.log(this.weatherDisplay.radarStationURL);
 
       const radarStation = await this.getRadarStation(this.weatherDisplay.radarStationURL);
       if (radarStation instanceof Error) {

@@ -2,29 +2,27 @@
   <div class = "row">
     <div class="col-sm">
       <div class="row">
-        <span class="heading">Location:</span><span>{{weatherDisplay.currentLocation}}</span>
+        <span class="display-heading">Location:</span><span class="display-value">{{weatherDisplay.currentLocation}}</span>
       </div>
       <div class="row">
-          <span class="heading">Temp:</span><span>{{weatherDisplay.currentTemperature}}°</span>
+          <span class="display-heading">Temp:</span><span class="display-value">{{weatherDisplay.currentTemperature}}°</span>
       </div>
       <div class="row">
-          <span class="heading">Lattitude</span><span>{{weatherDisplay.latitude}}</span>
+          <span class="display-heading">Lattitude</span><span class="display-value">{{weatherDisplay.latitude}}</span>
       </div>
       <div class="row">
-          <span class="heading">Longitude</span><span>{{weatherDisplay.longitude}}</span>
+          <span class="display-heading">Longitude</span><span class="display-value">{{weatherDisplay.longitude}}</span>
       </div>
       <div class="row">
-          <span class="heading">Condition:</span><span>{{weatherDisplay.currentCondition}}</span>
+          <span class="display-heading">Radar Station:</span><span class="display-value">{{weatherDisplay.radarStation}}</span>
       </div>
       <div class="row">
-          <span class="heading">Station:</span><span>{{weatherDisplay.radarStation}}</span>
+          <span class="display-heading">Reading Time:</span><span class="display-value">{{weatherDisplay.readingTime}}</span>
       </div>
-      <div class="row">
-          <span class="heading">Reading as of:</span><span>{{weatherDisplay.readingTime}}</span>
+      <div class="row condition">
+        <span class="display-heading">{{weatherDisplay.currentCondition}}</span>
+        <img src={{weatherDisplay.icon}}>
       </div>
-    </div>
-    <div class="col-sm icon">
-      <img src={{weatherDisplay.icon}}>
     </div>
   </div>
 </div>
