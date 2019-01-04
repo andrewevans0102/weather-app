@@ -8,6 +8,8 @@ export class WeatherDisplay {
     observationsURL: string;
     radarStation: string;
     forecast: {};
-    radarStationsURL: string;
+    radarStationURL: string;
+    currentCondition: string;
+    readingTime: string;
     errorMessage: string;
 }

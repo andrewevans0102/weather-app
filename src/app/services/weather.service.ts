@@ -19,29 +19,41 @@ export class WeatherService {
       }
       this.weatherDisplay.latitude = lat;
       this.weatherDisplay.longitude = long;
-      this.weatherDisplay.radarStation = metadata['properties']['radarStation'];
       const city = metadata['properties']['relativeLocation']['properties']['city'];
       const state = metadata['properties']['relativeLocation']['properties']['state'];
       this.weatherDisplay.currentLocation = city + ', ' + state;
       this.weatherDisplay.forecastURL = metadata['properties']['forecast'];
-      this.weatherDisplay.radarStationsURL = metadata['properties']['observationStations'];
+      this.weatherDisplay.observationsURL = metadata['properties']['forecastZone'] + '/observations';
 
-      // Select the closest radar station to use in call
-      const radarStations = await this.getRadarStations(this.weatherDisplay.radarStationsURL);
-      if (radarStations instanceof Error) {
-        throw radarStations;
-      }
-      const closestStation = this.getRadarStationClosest(radarStations['features'], lat, long);
-      this.weatherDisplay.observationsURL = closestStation + '/observations/latest';
+      console.log(this.weatherDisplay.observationsURL);
 
       const latestObservations = await this.getLatestObservations(this.weatherDisplay.observationsURL);
       if (latestObservations instanceof Error) {
         throw latestObservations;
       }
-      const celsius = latestObservations['properties']['temperature']['value'];
+      // when using the zone forecast endpoint only need to pick the first item in the response
+      // noaa provides feature observations in a list in order from earliest to latest here
+      const latestObservation = latestObservations['features'][0];
+      const celsius = latestObservation['properties']['temperature']['value'];
       const farenheit = (celsius + (9 / 5) + 32).toFixed(0);
       this.weatherDisplay.currentTemperature = String(farenheit);
-      this.weatherDisplay.icon = latestObservations['properties']['icon'];
+      this.weatherDisplay.icon = latestObservation['properties']['icon'];
+      this.weatherDisplay.currentCondition = latestObservation['properties']['textDescription'];
+      this.weatherDisplay.radarStationURL = latestObservation['properties']['station'];
+      const timestamp = latestObservation['properties']['timestamp'];
+      const timestampDate = timestamp.slice(0, 10);
+      const timestampTime = timestamp.slice(11, 16);
+      const displayDate = this.formatDate(timestampDate);
+      const displayTime = this.formatTime(timestampTime);
+      this.weatherDisplay.readingTime = displayDate + ', ' + displayTime;
+
+      console.log(this.weatherDisplay.radarStationURL);
+
+      const radarStation = await this.getRadarStation(this.weatherDisplay.radarStationURL);
+      if (radarStation instanceof Error) {
+        throw radarStation;
+      }
+      this.weatherDisplay.radarStation = radarStation['properties']['name'];
 
       const detailedForecast = await this.getDetailedForecast(this.weatherDisplay.forecastURL);
       if (detailedForecast instanceof Error) {
@@ -57,15 +69,37 @@ export class WeatherService {
     });
   }
 
+  formatDate(timestampDate: string): string {
+    const year = timestampDate.slice(0, 4);
+    const month = timestampDate.slice(6, 7);
+    const day = timestampDate.slice(9, 10);
+    const displayDate = month + '/' + day + '/' + year;
+    return displayDate;
+  }
+
+  formatTime(timestampTime: string): string {
+    // time comes in from noaa in GMT format so convert here to eastern standard time
+    let hour = Number(timestampTime.slice(0, 2));
+    const minute = timestampTime.slice(3, 5);
+    hour = hour - 5;
+    let displayTime = '';
+    if (hour < 12) {
+      displayTime = String(hour) + ':' + minute + ' AM';
+    } else {
+      displayTime = String(hour) + ':' + minute + ' PM';
+    }
+    return displayTime;
+  }
+
   getMetadata(lat: string, long: string): Promise<any> {
     const metadataURL: string = 'https://api.weather.gov/points/' + lat + ',' + long;
     return this.http.get(metadataURL).toPromise()
       .catch(() => new Error('error when calling metadataURL'));
   }
 
-  getRadarStations(observationsStationsURL): Promise<any> {
-    return this.http.get(observationsStationsURL).toPromise()
-      .catch(() => new Error('error when calling observationStationsURL'));
+  getRadarStation(radarStationURL): Promise<any> {
+    return this.http.get(radarStationURL).toPromise()
+      .catch(() => new Error('error when calling radarStationURL'));
   }
 
   getLatestObservations(observationsURL): Promise<any> {
@@ -76,40 +110,5 @@ export class WeatherService {
   getDetailedForecast(forecastURL): Promise<any> {
     return this.http.get(forecastURL).toPromise()
       .catch(() => new Error('error when calling forecastURL'));
-  }
-
-  getRadarStationClosest(observationStations: {}, lat: string, long: string): string {
-    const radarStations = <any> observationStations;
-    let closestStation = '';
-    let firstTime = true;
-    let minDistance = 0;
-
-    const x1: number = parseFloat(long);
-    const y1: number = parseFloat(lat);
-
-    radarStations.forEach((element) => {
-      // when calculating distance use the distance formula
-      // sqrt of (x2-x1)^2 + (y2-y1)^2
-      // long = x
-      // lat = y
-      const x2: number = parseFloat(element['geometry']['coordinates'][0]);
-      const y2: number = parseFloat(element['geometry']['coordinates'][1]);
-      const xSquared: number = (x2 - x1) * (x2 - x1);
-      const ySquared: number = (y2 - y1) * (y2 - y1);
-      const distance = Math.sqrt(xSquared + ySquared);
-
-      if (firstTime) {
-        firstTime = false;
-        minDistance = distance;
-        closestStation = element['id'];
-      } else {
-        if (distance < minDistance) {
-          minDistance = distance;
-          closestStation = element['id'];
-        }
-      }
-    });
-
-    return closestStation;
   }
 }

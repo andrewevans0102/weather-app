@@ -5,3 +5,9 @@
 .col-sm{
     width: 10em;
 }
+
+.heading{
+    font-weight: bold;
+    padding-right: 1em;
+    width: 8em;
+}

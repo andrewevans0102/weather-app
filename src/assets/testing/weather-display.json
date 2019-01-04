@@ -1,12 +1,11 @@
 {   "latitude": "37.6584",
     "longitude": "-77.6526",
-    "radarStation": "KAKQ",
-    "currentLocation": "Short Pump, VA",
-    "forecastURL": "https://api.weather.gov/gridpoints/AKQ/36,80/forecast",
-    "radarStationsURL": "https://api.weather.gov/gridpoints/AKQ/36,80/stations",
-    "observationsURL": "https://api.weather.gov/stations/KOFP/observations/latest",
     "currentTemperature": "33",
+    "currentLocation": "Short Pump, VA",
     "icon": "https://api.weather.gov/icons/land/day/snow?size=medium",
+    "forecastURL": "https://api.weather.gov/gridpoints/AKQ/36,80/forecast",
+    "observationsURL": "https://api.weather.gov/stations/KOFP/observations/latest",
+    "radarStation": "Richmond, Richmond International Airport",
     "forecast": [
       {
         "number": 1,
@@ -219,5 +218,8 @@
         "detailedForecast": "A slight chance of rain showers before 7pm. Partly cloudy, with a low around 34."
       }
     ],
+    "radarStationURL": "https://api.weather.gov/stations/KRIC",
+    "currentCondition": "Sunny",
+    "readingTime": "1/4/2019, 4:54 AM", 
     "errorMessage":""
   }
