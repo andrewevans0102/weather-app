@@ -5,11 +5,9 @@ export class WeatherDisplay {
     currentLocation: string;
     icon: string;
     forecastURL: string;
-    observationsURL: string;
-    radarStation: string;
     forecast: {};
-    radarStationURL: string;
     currentCondition: string;
-    readingTime: string;
+    sunrise: string;
+    sunset: string;
     errorMessage: string;
 }

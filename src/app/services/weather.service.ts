@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { WeatherDisplay } from '../models/weatherDisplay';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -23,33 +24,15 @@ export class WeatherService {
       const state = metadata['properties']['relativeLocation']['properties']['state'];
       this.weatherDisplay.currentLocation = city + ', ' + state;
       this.weatherDisplay.forecastURL = metadata['properties']['forecast'];
-      this.weatherDisplay.observationsURL = metadata['properties']['forecastZone'] + '/observations';
 
-      const latestObservations = await this.getLatestObservations(this.weatherDisplay.observationsURL);
-      if (latestObservations instanceof Error) {
-        throw latestObservations;
+      const currentWeather = await this.getCurrentWeatherOpenWeatherMapAPI(lat, long);
+      if (currentWeather instanceof Error) {
+        throw currentWeather;
       }
-      // when using the zone forecast endpoint only need to pick the first item in the response
-      // noaa provides feature observations in a list in order from earliest to latest here
-      const latestObservation = latestObservations['features'][0];
-      const celsius = latestObservation['properties']['temperature']['value'];
-      const farenheit = (celsius + (9 / 5) + 32).toFixed(0);
-      this.weatherDisplay.currentTemperature = String(farenheit);
-      this.weatherDisplay.icon = latestObservation['properties']['icon'];
-      this.weatherDisplay.currentCondition = latestObservation['properties']['textDescription'];
-      this.weatherDisplay.radarStationURL = latestObservation['properties']['station'];
-      const timestamp = latestObservation['properties']['timestamp'];
-      const timestampDate = timestamp.slice(0, 10);
-      const timestampTime = timestamp.slice(11, 16);
-      const displayDate = this.formatDate(timestampDate);
-      const displayTime = this.formatTime(timestampTime);
-      this.weatherDisplay.readingTime = displayDate + ', ' + displayTime;
-
-      const radarStation = await this.getRadarStation(this.weatherDisplay.radarStationURL);
-      if (radarStation instanceof Error) {
-        throw radarStation;
-      }
-      this.weatherDisplay.radarStation = radarStation['properties']['name'];
+      this.weatherDisplay.currentTemperature = currentWeather['main']['temp'];
+      this.weatherDisplay.currentCondition = currentWeather['weather'][0]['description'];
+      this.weatherDisplay.sunrise = this.formatSunrise(currentWeather['sys']['sunrise']);
+      this.weatherDisplay.sunset = this.formatSunset(currentWeather['sys']['sunset']);
 
       const detailedForecast = await this.getDetailedForecast(this.weatherDisplay.forecastURL);
       if (detailedForecast instanceof Error) {
@@ -65,26 +48,36 @@ export class WeatherService {
     });
   }
 
-  formatDate(timestampDate: string): string {
-    const year = timestampDate.slice(0, 4);
-    const month = timestampDate.slice(6, 7);
-    const day = timestampDate.slice(9, 10);
-    const displayDate = month + '/' + day + '/' + year;
-    return displayDate;
+  formatSunrise(sunrise: number): string {
+      // TODO make this a common method for both sunrise and sunset
+      // helpeful stackoverflow article here https://stackoverflow.com/questions/8362952/output-javascript-date-in-yyyy-mm-dd-hhmsec-format
+      const dSunrise = new Date(0);
+      dSunrise.setUTCSeconds(sunrise);
+      let sunriseMinutes = String(dSunrise.getUTCMinutes());
+      if (sunriseMinutes.length < 2) {
+        sunriseMinutes = '0' + sunriseMinutes;
+      }
+      let sunriseHours = (String(dSunrise.getUTCHours() - 5));
+      if (sunriseHours.length < 2) {
+        sunriseHours = '0' + sunriseHours;
+      }
+      const sunriseFormatted = sunriseHours + ':' + sunriseMinutes;
+      return sunriseFormatted;
   }
 
-  formatTime(timestampTime: string): string {
-    // time comes in from noaa in GMT format so convert here to eastern standard time
-    let hour = Number(timestampTime.slice(0, 2));
-    const minute = timestampTime.slice(3, 5);
-    hour = hour - 5;
-    let displayTime = '';
-    if (hour < 12) {
-      displayTime = String(hour) + ':' + minute + ' AM';
-    } else {
-      displayTime = String(hour) + ':' + minute + ' PM';
+  formatSunset(sunset: number): string {
+    const dSunset = new Date(0);
+    dSunset.setUTCSeconds(sunset);
+    let sunsetMinutes = String(dSunset.getUTCMinutes());
+    if (sunsetMinutes.length < 2) {
+      sunsetMinutes = '0' + sunsetMinutes;
     }
-    return displayTime;
+    let sunsetHours = (String(dSunset.getUTCHours() - 5));
+    if (sunsetHours.length < 2) {
+      sunsetHours = '0' + sunsetHours;
+    }
+    const sunriseFormatted = sunsetHours + ':' + sunsetMinutes;
+    return sunriseFormatted;
   }
 
   getMetadata(lat: string, long: string): Promise<any> {
@@ -101,6 +94,23 @@ export class WeatherService {
   getLatestObservations(observationsURL): Promise<any> {
     return this.http.get(observationsURL).toPromise()
       .catch(() => new Error('error when calling observationsURL'));
+  }
+
+  getCurrentWeatherOpenWeatherMapAPI(lat: string, long: string) {
+    const APIKey = environment.openWeatherMapAPIKey;
+    // default units are kelvin https://openweathermap.org/current
+    // pass the unit imperial here to use Farenheit
+    const units = 'imperial';
+    const openWeatherMapAPIURL = 'https://api.openweathermap.org/data/2.5/weather?lat=' + lat + '&lon=' + long
+      + '&units=' + units + '&appid=' + APIKey;
+    console.log(openWeatherMapAPIURL);
+    return this.http.get(openWeatherMapAPIURL).toPromise()
+      .catch(() => new Error('error when calling openWeatherMapURL'));
+  }
+
+  getHourlyForecast(hourlyURL): Promise<any> {
+    return this.http.get(hourlyURL).toPromise()
+      .catch(() => new Error('error when calling hourlyURL'));
   }
 
   getDetailedForecast(forecastURL): Promise<any> {
