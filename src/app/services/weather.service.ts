@@ -103,7 +103,6 @@ export class WeatherService {
     const units = 'imperial';
     const openWeatherMapAPIURL = 'https://api.openweathermap.org/data/2.5/weather?lat=' + lat + '&lon=' + long
       + '&units=' + units + '&appid=' + APIKey;
-    console.log(openWeatherMapAPIURL);
     return this.http.get(openWeatherMapAPIURL).toPromise()
       .catch(() => new Error('error when calling openWeatherMapURL'));
   }
