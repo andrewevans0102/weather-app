@@ -29,7 +29,7 @@ export class WeatherService {
       if (currentWeather instanceof Error) {
         throw currentWeather;
       }
-      this.weatherDisplay.currentTemperature = currentWeather['main']['temp'];
+      this.weatherDisplay.currentTemperature = String(Math.ceil(currentWeather['main']['temp']));
       this.weatherDisplay.currentCondition = currentWeather['weather'][0]['description'];
       this.weatherDisplay.sunrise = this.formatSunrise(currentWeather['sys']['sunrise']);
       this.weatherDisplay.sunset = this.formatSunset(currentWeather['sys']['sunset']);
