@@ -7,6 +7,7 @@ import { WeatherService } from './services/weather.service';
 import { WeatherDisplay } from './models/weatherDisplay';
 import { DebugElement } from '@angular/core';
 import { MaterialModule } from './material/material.module';
+import { WeatherDashboardComponent } from './components/weather-dashboard/weather-dashboard.component';
 
 describe('AppComponent', () => {
   let component: AppComponent;
@@ -20,7 +21,8 @@ describe('AppComponent', () => {
       declarations: [
         AppComponent,
         CurrentWeatherComponent,
-        ForecastComponent
+        ForecastComponent,
+        WeatherDashboardComponent
       ],
       providers: [ WeatherService ],
       imports: [
