@@ -11,3 +11,4 @@
 - The code for the app is open source and licensed with the MIT open source license on GitHub
 - The app is covered with karma tests currently at 89% (may be improved in the future)
 - Checkout more info on Andrew Evans' blog at [rhythm and binary](https://www.rhythmandbinary.com)
+- Dashboard was created with [angular schematics](https://material.angular.io/guide/schematics)
