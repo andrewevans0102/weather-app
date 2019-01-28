@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { map } from 'rxjs/operators';
 import { Breakpoints, BreakpointObserver } from '@angular/cdk/layout';
+import { Tile } from 'src/app/models/tile';
 
 @Component({
   selector: 'app-weather-dashboard',
@@ -13,10 +14,10 @@ export class WeatherDashboardComponent {
     map(({ matches }) => {
       if (matches) {
         return [
-          { title: 'Card 1', cols: 1, rows: 1 },
-          { title: 'Card 2', cols: 1, rows: 1 },
-          { title: 'Card 3', cols: 1, rows: 1 },
-          { title: 'Card 4', cols: 1, rows: 1 }
+          { title: 'Card 1', cols: 2, rows: 1 },
+          { title: 'Card 2', cols: 2, rows: 1 },
+          { title: 'Card 3', cols: 2, rows: 1 },
+          { title: 'Card 4', cols: 2, rows: 1 }
         ];
       }
 

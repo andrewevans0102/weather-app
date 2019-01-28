@@ -9,13 +9,15 @@ import { ForecastComponent } from './components/forecast/forecast.component';
 import { WeatherDashboardComponent } from './components/weather-dashboard/weather-dashboard.component';
 import { MatGridListModule, MatCardModule, MatMenuModule, MatIconModule, MatButtonModule } from '@angular/material';
 import { LayoutModule } from '@angular/cdk/layout';
+import { WeatherTileComponent } from './components/weather-tile/weather-tile.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     CurrentWeatherComponent,
     ForecastComponent,
-    WeatherDashboardComponent
+    WeatherDashboardComponent,
+    WeatherTileComponent
   ],
   imports: [
     BrowserModule,
