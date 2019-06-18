@@ -50,7 +50,7 @@ describe('AppComponent', () => {
   }));
 
   it('should call the HTML5 geolocation api and return error when not supported', fakeAsync(() => {
-    spyOn(navigator.geolocation, 'getCurrentPosition').and.returnValue(new Error('error occured'));
+    spyOn(navigator.geolocation, 'getCurrentPosition').and.returnValue(null);
     component.ngOnInit();
     flushMicrotasks();
     expect(component.lat).toEqual(undefined);

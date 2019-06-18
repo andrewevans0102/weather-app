@@ -69,7 +69,7 @@ describe('WeatherService', () => {
         const longitude = '-76.7496';
         spyOn(weatherService, 'getMetadata').and.returnValue(Promise.resolve(metadata));
         spyOn(weatherService, 'getCurrentWeatherOpenWeatherMapAPI').and.returnValue(Promise.resolve(currentWeather));
-        spyOn(weatherService, 'getDetailedForecast').and.returnValue(Error('error when calling forecastURL'));
+        spyOn(weatherService, 'getDetailedForecast').and.returnValue(Promise.reject(Error('error when calling forecastURL')));
         weatherService.getWeather(latitude, longitude).then(
         value => {
             expect(value.errorMessage).toBe('error when calling forecastURL');
